@@ -13,6 +13,8 @@ import collections
 import contextlib
 import datetime
 
+import atexit
+
 
 class Command:
     """Commands for Iridium. Maybe in the future make a system where a command is a class associted with a specific 
@@ -547,6 +549,12 @@ class IridiumCommunicator(object):
 
     def __init__(self, serialport=None, signal=None, options=None):
         super().__init__()
+        
+        # Close when the program exits
+        def safe_close():
+            try: self.close()
+            except (RuntimeError, AttributeError): pass
+        atexit.register(safe_close)
 
         # Protocol callback methods
         self._signal = None
