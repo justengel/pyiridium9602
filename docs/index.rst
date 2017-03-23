@@ -6,7 +6,7 @@ Contents:
 .. toctree::
    :titlesonly:
 
-   pyiridium9602
+   pyiridium
 
 
 Indices and tables
