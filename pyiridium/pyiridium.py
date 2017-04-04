@@ -1583,14 +1583,23 @@ class IridiumCommunicator(object):
 # end class IridiumCommunicator
 
 
-def run_serial_log_file(filename, communicator):
-    """Play a log file back through a communicator."""
+def run_serial_log_file(filename, communicator, print_serial=None):
+    """Play a log file back through a communicator.
+    
+    Args:
+        filename(str): Name of the log file to read in
+        communicator (IridiumCommunicator/str): IridiumCommunicator object or com port name to use to emulate the communications.
+        print_serial (function): Function to emulate io for the reading and writing. This should simply be a display function to see the I/O.
+    """
     with open(filename, "rb") as file:
         buffer = file.read()
 
     if isinstance(communicator, str):
         communicator = IridiumCommunicator(communicator)
         Signal.set_to_print(communicator.signal)
+        
+    if print_serial is None:
+        print_serial = lambda bs: None
 
     if not communicator.is_connected():
         communicator.silent_connect()
@@ -1636,6 +1645,8 @@ def run_serial_log_file(filename, communicator):
                     buffer = b''
 
             # Set the receive buffer to process data
+            print_serial(cmd + b'\r')
+            print_serial(data)
             communicator._previous_command = cmd
             communicator.check_io(data)
 
@@ -1646,6 +1657,7 @@ def run_serial_log_file(filename, communicator):
             # Skip
             data = buffer[:at_idx+end_idx]
             if data != b"":
+                print_serial(data)
                 communicator.check_io(data)
             buffer = buffer[at_idx+end_idx:]
 
