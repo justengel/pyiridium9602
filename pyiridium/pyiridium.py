@@ -846,8 +846,7 @@ class IridiumCommunicator(object):
             if self.is_port_connected():
                 data = self.read_serial()
                 self.check_io(data)
-            else:
-                time.sleep(0.01) # prevent the thread from being greedy when not connected
+            time.sleep(0.001)  # prevent the thread from being greedy when not connected
     # end listen
 
     def check_io(self, message=b''):
