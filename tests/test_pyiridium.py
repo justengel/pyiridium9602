@@ -10,9 +10,11 @@ import pyiridium
 # Create your own serial port object and give it as the first argument or just give it the port name.
 iridium_port = pyiridium.IridiumCommunicator("COM2")
 
+
 # Message parser
 def parse_data(data):
     print("My data:", data)
+
 
 def message_failed(msg_len, content, checksum, calc_check):
     print("Message Failed checksum or length!", msg_len, content, checksum, calc_check)
@@ -30,7 +32,7 @@ iridium_port.signal.message_receive_failed = message_failed
 iridium_port.signal.notification = print
 
 # NOTE: There is no thread, so connect creates a thread to Complete the connection process
-iridium_port.connect() # Raises IridiumError if the port cannot be opened or if the ping did not find a response.
+iridium_port.connect()  # Raises IridiumError if the port cannot be opened or if the ping did not find a response.
 
 # Non blocking command requests
 iridium_port.request_signal_quality()
@@ -38,7 +40,7 @@ iridium_port.queue_system_time()
 
 # If you run a request immediately after a request then the response will error
 # This is because the first command will have it's value returned while this command
-#iridium_port.request_serial_number()
+# iridium_port.request_serial_number()
 
 # Blocking command (wait for previous command and wait to complete)
 with iridium_port.wait_for_command():

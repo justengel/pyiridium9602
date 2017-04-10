@@ -3,7 +3,7 @@
     SeaLandAire Technologies
     @author: jengel
 
-Iridium satelite communications server emulator.
+Iridium satellite communications server emulator.
 
 Note:
     Not everything in this server works correctly. The below code is a simple test emulator for what I have observed 
@@ -57,7 +57,7 @@ class IridiumServer(pyiridium.IridiumCommunicator):
         
         Args:
             port_id (str/serial.Serial): COM port string or serial object.
-            create_thread (bool): If True create a thread if the communicator is not already listenting
+            create_thread (bool): If True create a thread if the communicator is not already listening
 
         Raises:
             IridiumError: If the port cannot be opened or if the ping did not find a response.
@@ -85,7 +85,7 @@ class IridiumServer(pyiridium.IridiumCommunicator):
     # end connect
 
     def write_iridium(self, data):
-        """Write to the iridium? This command is called after a complete Write Binary commmand has been received.
+        """Write to the iridium? This command is called after a complete Write Binary command has been received.
         
         Args:
             data (bytes): 2 bytes of message length, contents, 2 bytes of checksum
@@ -113,7 +113,7 @@ class IridiumServer(pyiridium.IridiumCommunicator):
     # end _silent_write
     
     def set_echo(self, value=True):
-        """Send the echo commmand."""
+        """Send the echo command."""
         self.set_option('echo', value)
     # end set_echo
     
@@ -192,8 +192,8 @@ class IridiumServer(pyiridium.IridiumCommunicator):
         # Repeat the last command
         elif cmd == Command.REPEAT_LAST_COMMAND + b'\r':
             self.echo_command(cmd)
-            self._read_history.pop() # Remove the b'A/' Repeat Last Command from history. Don't know.
-            self._silent_write(self._read_history[-1] + b'\r\n\r\n') # Skip repeat of the b'A/'
+            self._read_history.pop()  # Remove the b'A/' Repeat Last Command from history. Don't know.
+            self._silent_write(self._read_history[-1] + b'\r\n\r\n')  # Skip repeat of the b'A/'
             self._silent_write(Command.OK + b'\r\n')
 
         # Return echo
@@ -206,7 +206,7 @@ class IridiumServer(pyiridium.IridiumCommunicator):
         # Return Identification
         elif cmd == Command.RETURN_IDENTIFICATION + b'\r':
             self.echo_command(cmd)
-            self._silent_write(b'4' + b'\r\n\r\n') # 4 for Iridium 9602 Family
+            self._silent_write(b'4' + b'\r\n\r\n')  # 4 for Iridium 9602 Family
             self._silent_write(Command.OK + b'\r\n')
 
         # System Time
@@ -224,7 +224,7 @@ class IridiumServer(pyiridium.IridiumCommunicator):
             self.echo_command(cmd)
             # Request signal strength
             msg = b''.join((b"+CSQ:",
-                            str(self._signal_quality).encode("utf-8"), # Signal threshold is 2, max is 5
+                            str(self._signal_quality).encode("utf-8"),  # Signal threshold is 2, max is 5
                             b'\r\n\r\n',  # End the message
                             ))
             self._silent_write(msg)
@@ -248,10 +248,10 @@ class IridiumServer(pyiridium.IridiumCommunicator):
         elif cmd == Command.CHECK_RING + b'\r':
             self.echo_command(cmd)
             # Check the ring message
-            msg = b''.join((b"+CRIS: ", # Ring response
-                            b'0,', # Telephone 0
-                            str(len(self._write_queue)).encode("utf-8"), # SBD ring indication status
-                            b'\r\n\r\n' # End the message
+            msg = b''.join((b"+CRIS: ",  # Ring response
+                            b'0,',  # Telephone 0
+                            str(len(self._write_queue)).encode("utf-8"),  # SBD ring indication status
+                            b'\r\n\r\n'  # End the message
                             ))
             self._silent_write(msg)
             self._silent_write(Command.OK + b'\r\n')
@@ -269,14 +269,14 @@ class IridiumServer(pyiridium.IridiumCommunicator):
                 queue_len = 0
 
             msg = b''.join((b'+SBDIX: ',
-                            str(self._mo_status).encode("utf-8"), b',', # MO Status
+                            str(self._mo_status).encode("utf-8"), b',',  # MO Status
                             str(self._session_counter).encode("utf-8"), b',',
                             str(mt_status).encode("utf-8"), b',',
                             str(self._mt_msn).encode("utf-8"), b',',
                             str(mt_len).encode("utf-8"), b',',
                             str(queue_len).encode("utf-8"),
                             b'\r\n\r\n'
-                ))
+                            ))
             self._silent_write(msg)
 
             self._session_counter = (self._session_counter + 1) & 0xffff
@@ -291,8 +291,8 @@ class IridiumServer(pyiridium.IridiumCommunicator):
             if len(self._write_queue) > 0:
                 msg = self._write_queue.popleft()
                 msg_len = len(msg).to_bytes(2, 'big')
-                checksum = int(sum(msg)).to_bytes(4, 'big')[2:] # smallest 2 bytes of the sum
-                self._silent_write(b''.join((b'AT+SBDRB\r',msg_len, msg, checksum, b'\r\n\r\n')))
+                checksum = int(sum(msg)).to_bytes(4, 'big')[2:]  # smallest 2 bytes of the sum
+                self._silent_write(b''.join((b'AT+SBDRB\r', msg_len, msg, checksum, b'\r\n\r\n')))
 
             self._silent_write(Command.OK + b'\r\n')
 
@@ -303,7 +303,7 @@ class IridiumServer(pyiridium.IridiumCommunicator):
             self.echo_command(cmd)
 
             try:
-                length = int(data.decode("utf-8")) # length of the expected message
+                length = int(data.decode("utf-8"))  # length of the expected message
 
                 # Read for the Binary data
                 self._silent_write(Command.READY + b'\r\n')
@@ -324,7 +324,7 @@ class IridiumServer(pyiridium.IridiumCommunicator):
                 # Successful write binary command with the correct length
                 contents = msg[:-2]
                 checksum = msg[-2:]
-                calc_check = int(sum(contents)).to_bytes(4, 'big')[2:] # smallest 2 bytes of the sum
+                calc_check = int(sum(contents)).to_bytes(4, 'big')[2:]  # smallest 2 bytes of the sum
                 if checksum == calc_check:
                     # This is were a read Iridium modem would send the message
                     self.write_iridium(b''.join((str(length).encode("utf-8"), contents, checksum)))
@@ -334,7 +334,7 @@ class IridiumServer(pyiridium.IridiumCommunicator):
                     self._silent_write(b'0' + b'\r\n')  # Success
 
                 else:
-                    self._mo_status = 18  # Connect lost (RF drop). I don't think there is a checksome fail message
+                    self._mo_status = 18  # Connect lost (RF drop). I don't think there is a checksum fail message
 
                     self._silent_write(b'\r\n')
                     self._silent_write(b'18' + b'\r\n')  # Error
@@ -370,7 +370,7 @@ class IridiumServer(pyiridium.IridiumCommunicator):
 
 def run_server(port="COM2"):
     """Create an instance of IridiumServer and connect to the given port. This method will run until the user gives
-    empyt input or types "exit".
+    empty input or types "exit".
     """
     ser = IridiumServer(port)
     ser.connect()

@@ -11,7 +11,9 @@ import time
 # Create your own serial port object and give it as the first argument or just give it the port name.
 iridium_port = pyiridium.IridiumCommunicator("COM2")
 
+
 def message_failed(msg_len, content, checksum, calc_check):
+    """Signal that the message has failed."""
     print("Message Failed!")
     print("Message Length:", msg_len, "Received Length: ", len(content))
     print("Message Data:", content)
@@ -21,7 +23,7 @@ iridium_port.signal.message_received = lambda data: print("Message Received:", d
 iridium_port.signal.message_receive_failed = message_failed
 
 # NOTE: There is no thread, so connect creates a thread to Complete the connection process
-iridium_port.connect() # Raises IridiumError if the port cannot be opened or if the ping did not find a response.
+iridium_port.connect()  # Raises IridiumError if the port cannot be opened or if the ping did not find a response.
 
 # Non blocking command requests
 print("Signal Quality (0 - 5):", iridium_port.acquire_signal_quality())

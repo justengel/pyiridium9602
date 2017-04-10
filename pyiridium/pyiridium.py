@@ -3,7 +3,7 @@
     SeaLandAire Technologies
     @author: jengel
 
-Manages iridium satelite communications.
+Manages iridium satellite communications.
 Iridium data sheet: http://www.nalresearch.com/Info/AT%20Commands%20for%20Models%209602.pdf
 """
 import time
@@ -17,7 +17,7 @@ import atexit
 
 
 class Command:
-    """Commands for Iridium. Maybe in the future make a system where a command is a class associted with a specific 
+    """Commands for Iridium. Maybe in the future make a system where a command is a class associated with a specific 
     parsing action. That would make it easier to add new commands.
     """
     OK = b'OK'
@@ -54,7 +54,7 @@ class Command:
     READ_BINARY = b'AT+SBDRB'
     READ_BINARY_RECEIVE = b'AT+SBDRB\r'
 
-    WRITE_BINARY = b'AT+SBDWB=' # length of message
+    WRITE_BINARY = b'AT+SBDWB='  # length of message
     
     # OTHER COMMANDS
     REPEAT_LAST_COMMAND = b'A/'
@@ -80,7 +80,7 @@ class Command:
 
 
 # MO STATUS
-MO_STATUS = {}
+MO_STATUS = dict()
 MO_STATUS[0] = "MO message, if any, transferred successfully."
 MO_STATUS[1] = ("MO message, if any, transferred successfully, but the MT message in the "
                 " queue was too big to be transferred.")
@@ -90,7 +90,7 @@ MO_STATUS[3] = "Reserved, but indicate MO session success if used."
 MO_STATUS[4] = "Reserved, but indicate MO session success if used."
 
 # Failed
-MO_STATUS.update({i:"Reserved, but indicate MO session failure if used." for i in range(5, 9)})
+MO_STATUS.update({i: "Reserved, but indicate MO session failure if used." for i in range(5, 9)})
 MO_STATUS[10] = "Gateway reported that the call did not complete in the allowed time."
 MO_STATUS[11] = "MO message queue at the Gateway is full."
 MO_STATUS[12] = "MO message has too many segments."
@@ -106,14 +106,14 @@ MO_STATUS[18] = "Connection lost (RF drop)."
 MO_STATUS[32] = "No network service, unable to initiate call."
 MO_STATUS[33] = "Antenna fault, unable to initiate call."
 MO_STATUS[34] = "Radio is disabled, unable to initiate call (see *Rn command)."
-MO_STATUS[35] = "9602 is busy, unable to initiate call (typically performing autoregistration)."
+MO_STATUS[35] = "9602 is busy, unable to initiate call (typically performing auto-registration)."
 
 
 # MT STATUS
 MT_STATUS = {0: "No MT SBD message to receive from the Gateway.",
              1: "MT SBD message successfully received from the Gateway.",
              2: "An error occurred while attempting to perform a mailbox check or receive a message from the Gateway.",
-}
+             }
 
 
 class IridiumError(Exception):
@@ -299,7 +299,7 @@ def parse_session(data):
             mt_msn = int(parts[3])
             mt_length = int(parts[4])
             mt_queued = int(parts[5])
-            return (mo_status, mo_msn, mt_status, mt_msn, mt_length, mt_queued)
+            return mo_status, mo_msn, mt_status, mt_msn, mt_length, mt_queued
 
     except Exception as err:
         raise IridiumError("Could not parse the session!") from err
@@ -337,13 +337,12 @@ def parse_read_binary(data):
             raise ValueError("Not enough data given!")
 
         # Calculate the checksum
-        calc_check = int(sum(content)).to_bytes(4, 'big')[2:] # smallest 2 bytes of the sum
+        calc_check = int(sum(content)).to_bytes(4, 'big')[2:]  # smallest 2 bytes of the sum
 
         return msg_len, content, checksum, calc_check
 
     except Exception as err:
         raise IridiumError("Could not parse the read binary response!") from err
-    raise IridiumError("Could not parse the read binary response!")
 # end parse_read_binary
 
 
@@ -365,13 +364,13 @@ def has_read_binary_data(data):
     
         # Check the data
         msg_len = int.from_bytes(data[:2], "big")
-        #content = data[2: msg_len + 2]
+        # content = data[2: msg_len + 2]
         checksum = data[msg_len + 2: msg_len + 2 + 2]
         if len(checksum) != 2:
             return False
         return True
 
-    except Exception:
+    except (AttributeError, ValueError, TypeError):
         return False
 # end has_read_binary_data
 
@@ -457,8 +456,8 @@ class Signal(object):
         """
         pass
     
-    def message_transfered(self, mo_msn):
-        """This method is called after a session indicates that a message has been transfered successfully."""
+    def message_transferred(self, mo_msn):
+        """This method is called after a session indicates that a message has been transferred successfully."""
         pass
     
     def message_transfer_failed(self, mo_msn):
@@ -466,7 +465,7 @@ class Signal(object):
         pass
     
     def notification(self, ntype, message, additional_info):
-        """This method notifys when something has happened.
+        """This method notifies when something has happened.
         
         Args:
             ntype (str): Notification type. "Error", "Success", "Warning", "Info"
@@ -488,7 +487,7 @@ class Signal(object):
     
     API = ['connecting', 'connected', 'disconnecting', 'disconnected', 
            'system_time_updated', 'serial_number_updated', 'signal_quality_updated', 'check_ring_updated',
-           'message_received', 'message_receive_failed', 'message_transfered', 'message_transfer_failed',
+           'message_received', 'message_receive_failed', 'message_transferred', 'message_transfer_failed',
            'notification', 'command_finished']
 
     @staticmethod
@@ -514,7 +513,7 @@ class Signal(object):
                                                                    "Content:", c,
                                                                    "Checksum:", ck,
                                                                    "Calc Checksum:", cc)
-        signal.message_transfered = lambda s: print("Message Transfered:", s)
+        signal.message_transferred = lambda s: print("Message Transferred:", s)
         signal.message_transfer_failed = lambda s: print("Message Transfer Failed:", s)
         signal.notification = lambda et, m, a: print("Notification:", et, m, repr(a))
         signal.command_finished = lambda cmd, v, c: print("Command Finished:", cmd, v, c)
@@ -523,7 +522,7 @@ class Signal(object):
 
 
 class IridiumCommunicator(object):
-    """Comminicates with an iridium modem through a serial port.
+    """Communicates with an iridium modem through a serial port.
     
     Note:
         IridiumCommunicator().connect() should be called to connect the serial port.
@@ -532,7 +531,7 @@ class IridiumCommunicator(object):
         It is suggested that you use the "queue_" commands when writing to the serial port. If you call a request 
         command be careful to wait until the command is finished until you call another request command. You can wait
         for commands to finish by using the `IridiumCommunicator.wait_for_command` context manager or by calling the
-        appropriate `aquire_response` method. 
+        appropriate `acquire_response` method. 
 
     Args:
         serialport(serial.Serial/str): Serial port or string com port name.
@@ -595,6 +594,7 @@ class IridiumCommunicator(object):
     def signal(self):
         """Return the signal object."""
         return self._signal
+
     @signal.setter
     def signal(self, value):
         """Set the signal and make sure all of the functions are callable."""
@@ -614,7 +614,7 @@ class IridiumCommunicator(object):
                     else:
                         # Set an empty function
                         setattr(self._signal, key, lambda *args, **kwargs: None)
-                elif not  callable(attr):
+                elif not callable(attr):
                     raise IridiumError("Signal must have the attribute " + repr(key) + " callable!")
         else:
             self._signal = Signal()
@@ -624,6 +624,7 @@ class IridiumCommunicator(object):
     def serial_number(self):
         """Return the serial number or imei number."""
         return self._serial_number
+
     @serial_number.setter
     def serial_number(self, value):
         self._serial_number = value
@@ -632,6 +633,7 @@ class IridiumCommunicator(object):
     def imei(self):
         """Return the serial number or imei number."""
         return self.serial_number
+
     @imei.setter
     def imei(self, value):
         self.serial_number = value
@@ -644,6 +646,7 @@ class IridiumCommunicator(object):
             IridiumCommunicator().connect should be called to connect the serial port.
         """
         return self._serialport
+
     @serialport.setter
     def serialport(self, serialport):
         """Set the serial port with a serial port object."""
@@ -663,6 +666,7 @@ class IridiumCommunicator(object):
         A larger timeout has a higher chance of success, but may take a lot longer for every operation.
         """ 
         return self._timeout
+
     @timeout.setter
     def timeout(self, value):
         self._timeout = value
@@ -678,6 +682,7 @@ class IridiumCommunicator(object):
         connection process takes a long time and may freeze your application.
         """
         return self._connect_timeout
+
     @connect_timeout.setter
     def connect_timeout(self, value):
         self._connect_timeout = value
@@ -716,7 +721,7 @@ class IridiumCommunicator(object):
         
         Args:
             port_id (str/serial.Serial): COM port string or serial object.
-            create_thread (bool): If True create a thread if the communicator is not already listenting
+            create_thread (bool): If True create a thread if the communicator is not already listening
 
         Raises:
             IridiumError: If the port cannot be opened or if the ping did not find a response.
@@ -808,7 +813,7 @@ class IridiumCommunicator(object):
         
         # Disconnected signal
         self.signal.disconnected()
-    # end clsoe
+    # end close
 
     def is_port_connected(self):
         """Return if the serial port is connected."""
@@ -827,11 +832,11 @@ class IridiumCommunicator(object):
         self._active = value
 
     def stop_listening(self):
-        """Stop the IridiumCommunicator from listining."""
+        """Stop the IridiumCommunicator from listening."""
         self._active = False
         try:
             self.listen_thread.join()
-        except (AttributeError):
+        except AttributeError:
             pass
         self.listen_thread = None
 
@@ -921,14 +926,15 @@ class IridiumCommunicator(object):
 
                     # ========== Run operations from parsed message ==========
                     # Check outgoing
-                    if mo_status <= 4 and mo_status >= 0:
+                    if 4 >= mo_status >= 0:
                         self.queue_clear_mo_buffer()
 
-                        # Success - Message Transfered signal
-                        self.signal.message_transfered(mo_msn)
+                        # Success - Message Transferred signal
+                        self.signal.message_transferred(mo_msn)
                     else:
                         # Failed - Message Transfer Failed signal
-                        self.signal.notification("Error", "Message Transfer Failed!", MO_STATUS.get(mo_status, "Unknown failure!"))
+                        self.signal.notification("Error", "Message Transfer Failed!",
+                                                 MO_STATUS.get(mo_status, "Unknown failure!"))
                         self.signal.message_transfer_failed(mo_msn)
 
                     # Check if there is a message to process - mt_status 0 no message, 1 success, 2 fail
@@ -936,7 +942,8 @@ class IridiumCommunicator(object):
                         self.queue_read_binary_message()
 
                     elif mt_status > 1:
-                        self.signal.notification("Error", "Message Receive Failed!", MT_STATUS.get(mt_status, "Unknown error!"))
+                        self.signal.notification("Error", "Message Receive Failed!",
+                                                 MT_STATUS.get(mt_status, "Unknown error!"))
 
                     # Check for additional messages until the queue is empty
                     if mt_queued > 0 and self.get_option("auto_read"):
@@ -1010,10 +1017,10 @@ class IridiumCommunicator(object):
                 # Write a binary message
                 message = self._write_queue.popleft()
                 # msg_length already given with the write binary message
-                checksum = int(sum(message)).to_bytes(4, 'big')[2:] # smallest 2 bytes of the sum
+                checksum = int(sum(message)).to_bytes(4, 'big')[2:]  # smallest 2 bytes of the sum
                 self.write_serial(message + checksum)
 
-            # A message with no known responese completed
+            # A message with no known response completed
             self.signal.command_finished(self._previous_command, command_success, data)
             self._previous_command = None        
     # end check_pending_command
@@ -1030,7 +1037,7 @@ class IridiumCommunicator(object):
 
         elif len(self._sequential_write_queue) > 0:
             # Write messages from the queue
-            self._previous_command =  self._sequential_write_queue.popleft()
+            self._previous_command = self._sequential_write_queue.popleft()
             self.write_serial(self.previous_command + b'\r')
             self._read_buf = b''
 
@@ -1046,6 +1053,7 @@ class IridiumCommunicator(object):
     def previous_command(self):
         """Private variable storing the previous command."""
         return self._previous_command
+
     @previous_command.setter
     def previous_command(self, command):
         """Set a command as pending."""
@@ -1116,10 +1124,11 @@ class IridiumCommunicator(object):
 
         # Collect command finished data for unknown commands
         cmd_finish = []
+
         def command_finished(cmd, val, content=b''):
             """"Find where commands finished True for unknown commands."""
             if val and cmd == command and len(values) == 0:
-                values.append(content) # May be empty
+                values.append(content)  # May be empty
             old_command_finished(cmd, val, content)
 
         # Replace the signal callbacks with the collect callback
@@ -1147,7 +1156,7 @@ class IridiumCommunicator(object):
             if len(cmd_finish) == 0:
                 # No commands finished successfully
                 raise IridiumError("The command timed out or completed without returning a proper value!")
-            values.append(cmd_finish[-1][2]) # Return the found content
+            values.append(cmd_finish[-1][2])  # Return the found content
 
         # Unpack the last value
         if isinstance(values[-1], (list, tuple)) and len(values[-1]) == 1:
@@ -1276,7 +1285,7 @@ class IridiumCommunicator(object):
         return self.get_option('echo')
 
     def set_echo(self, value=True):
-        """Send the echo commmand."""
+        """Send the echo command."""
         if not self.is_port_connected():
             self.signal.notification("Error", "Serial port not connected", "The port is closed!")
             return False
@@ -1477,13 +1486,13 @@ class IridiumCommunicator(object):
             self.signal.notification("Error", "Serial port not connected", "The port is closed!")
             return False
 
-        self.previous_command = Command.CLEAR_BOTH_BUFFER
+        self.previous_command = Command.CLEAR_BOTH_BUFFERS
         self.write_serial(self.previous_command + b'\r')
     # end clear_both_buffer
 
     def queue_clear_both_buffer(self):
         """Queue the clear mo transmit and mt receive message."""
-        self.queue_command(Command.CLEAR_BOTH_BUFFER)
+        self.queue_command(Command.CLEAR_BOTH_BUFFERS)
 
     def check_message(self):
         """Check for a message by using a session."""
@@ -1513,6 +1522,7 @@ class IridiumCommunicator(object):
 
         # Create a collection method to collect the value
         values = []
+
         def collect_values(data):
             values.append(data)
 
@@ -1533,10 +1543,10 @@ class IridiumCommunicator(object):
         self.previous_command = Command.SESSION
         self.write_serial(self.previous_command + b"\r")
 
-        # Wait for other commands to finishe like clear_mo_buffer, and read_binary
+        # Wait for other commands to finish like clear_mo_buffer, and read_binary
         start = time.clock()
         while (self.pending_command() or len(self._sequential_write_queue) > 0) and (
-                time.clock() - start < wait_for_previous):
+                time.clock() - start < wait_time):
             time.sleep(0.001)
 
         # Replace the signal callbacks with their original methods
@@ -1592,7 +1602,7 @@ class IridiumCommunicator(object):
         if isinstance(message, str):
             message = message.encode("utf-8")
 
-        self._write_queue.append((message))
+        self._write_queue.append(message)
         self.previous_command = Command.WRITE_BINARY + str(len(message)).encode("utf-8")
         self.write_serial(self.previous_command + b'\r')
     # end send_message
@@ -1609,7 +1619,7 @@ class IridiumCommunicator(object):
         if isinstance(message, str):
             message = message.encode("utf-8")
 
-        self._write_queue.append((message))
+        self._write_queue.append(message)
         self.queue_command(Command.WRITE_BINARY + str(len(message)).encode("utf-8"))
     # end _queue_message
 # end class IridiumCommunicator
@@ -1620,8 +1630,10 @@ def run_serial_log_file(filename, communicator, print_serial=None):
     
     Args:
         filename(str): Name of the log file to read in
-        communicator (IridiumCommunicator/str): IridiumCommunicator object or com port name to use to emulate the communications.
-        print_serial (function): Function to emulate io for the reading and writing. This should simply be a display function to see the I/O.
+        communicator (IridiumCommunicator/str): IridiumCommunicator object or com port name to use to emulate the 
+            communications.
+        print_serial (function): Function to emulate io for the reading and writing. This should simply be a display 
+            function to see the I/O.
     """
     with open(filename, "rb") as file:
         buffer = file.read()
@@ -1631,7 +1643,9 @@ def run_serial_log_file(filename, communicator, print_serial=None):
         Signal.set_to_print(communicator.signal)
         
     if print_serial is None:
-        print_serial = lambda bs: None
+        def print_serial(bs):
+            """Fake pass through method"""
+            pass
 
     if not communicator.is_connected():
         communicator.silent_connect()
@@ -1649,7 +1663,7 @@ def run_serial_log_file(filename, communicator, print_serial=None):
 
         end_idx = buffer[at_idx:].find(b'\r')
         newline_idx = buffer[at_idx:].find(b'\n')
-        if end_idx + 2 < newline_idx: # Commands send with \r. Commands echo with \r\r\n
+        if end_idx + 2 < newline_idx:  # Commands send with \r. Commands echo with \r\r\n
             # Valid command
             previous_data = buffer[:at_idx]
             if previous_data != b"":
@@ -1710,7 +1724,7 @@ def run_communicator(port="COM2"):
     iridium_port.signal.message_receive_failed = message_failed
 
     # NOTE: There is no thread, so connect creates a thread to Complete the connection process
-    iridium_port.connect() # Raises IridiumError if the port cannot be opened or if the ping did not find a response.
+    iridium_port.connect()  # Raises IridiumError if the port cannot be opened or if the ping did not find a response.
 
     # Non blocking command requests
     print("Signal Quality (0 - 5):", iridium_port.acquire_signal_quality())
@@ -1751,11 +1765,10 @@ if __name__ == "__main__":
                         help='Filename to run a log file.',
                         default=filename)
 
-    args, remain = parser.parse_known_args(sys.argv[1:])
-    #sys.argv = sys.argv[:1] + remain
+    pargs, remain = parser.parse_known_args(sys.argv[1:])
+    # sys.argv = sys.argv[:1] + remain
 
-
-    if args.filename is not None:
-        run_serial_log_file(args.filename, args.p)
+    if pargs.filename is not None:
+        run_serial_log_file(pargs.filename, pargs.p)
     else:
-        run_communicator(args.p)    
+        run_communicator(pargs.p)

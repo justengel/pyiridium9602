@@ -10,12 +10,14 @@ import time
 # Create your own serial port object and give it as the first argument or just give it the port name.
 iridium_port = pyiridium.IridiumCommunicator("COM2")
 
+
 class CustomSignal(object):
-    """Create a cusotm Signal callback manager.
+    """Create a custom Signal callback manager.
     
     Note:
         If other Signal methods do not exist they will be created as empty methods. If the notification method
-        does not exist it will use the print function. You may want to use the notification method for logging special events.
+        does not exist it will use the print function. You may want to use the notification method for logging special 
+        events.
 
     See Also:
         pyiridium.Signal
@@ -71,7 +73,7 @@ th = threading.Thread(target=iridium_port.listen)
 th.start()
 
 # NOTE: There is no thread, so connect creates a thread to Complete the connection process
-iridium_port.connect() # Raises IridiumError if the port cannot be opened or if the ping did not find a response.
+iridium_port.connect()  # Raises IridiumError if the port cannot be opened or if the ping did not find a response.
 
 # Blocking methods example
 sys_time = iridium_port.acquire_system_time()

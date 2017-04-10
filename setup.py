@@ -121,7 +121,7 @@ setup(
     # options to install extra requirements
     # extras_require={ 
     #     'dev': [],
-    #     'test': ['converage'],
+    #     'test': ['converge'],
     # }
     
     # Data files outside of packages

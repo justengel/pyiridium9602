@@ -24,7 +24,7 @@ if __name__ == "__main__":
                         help="Run the server instead.")
 
     args, remain = parser.parse_known_args(sys.argv[1:])
-    #sys.argv = sys.argv[:1] + remain
+    # sys.argv = sys.argv[:1] + remain
 
     if args.s:
         run_server(args.p)
