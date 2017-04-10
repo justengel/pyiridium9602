@@ -1033,7 +1033,8 @@ class IridiumCommunicator(object):
             idx = self._read_buf.index(Command.RING)
             self._read_buf = self._read_buf[idx + len(Command.RING):]
 
-            self.queue_session()
+            if Command.SESSION not in self._sequential_write_queue:
+                self.queue_session()
 
         elif len(self._sequential_write_queue) > 0:
             # Write messages from the queue
