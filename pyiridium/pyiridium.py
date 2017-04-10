@@ -42,7 +42,11 @@ class Command:
     SERIAL_NUMBER = b'AT+CGSN'
     SIGNAL_QUALITY = b'AT+CSQ'
     CHECK_RING = b'AT+CRIS'
+
+    CLEAR_BUFFER = b'AT+SBDD'
     CLEAR_MO_BUFFER = b'AT+SBDD0'
+    CLEAR_MT_BUFFER = b'AT+SBDD1'
+    CLEAR_BOTH_BUFFERS = b'AT+SBDD2'
 
     SESSION = b'AT+SBDIX'
     SESSION_RECEIVE = b'+SBDIX:'
@@ -976,14 +980,15 @@ class IridiumCommunicator(object):
             elif Command.WRITE_BINARY == self._previous_command:
                 try:
                     command_success = parse_write_binary(data)
-                except IridiumError:
+                except IridiumError as err:
                     self.signal.notification("Error", "Could not parse the write binary response", str(err))
                     command_success = False
 
-            # Clear MO Buffer
-            elif Command.CLEAR_MO_BUFFER == self._previous_command:
+            # Clear Buffer (MO or MT or both)
+            elif Command.CLEAR_BUFFER in self._previous_command:
                 # The data should be b'0'
-                resp = data.replace(Command.CLEAR_MO_BUFFER, b'').strip()
+                resp = data.replace(Command.CLEAR_MO_BUFFER, b'').replace(Command.CLEAR_MO_BUFFER, b'')\
+                    .replace(Command.CLEAR_BOTH_BUFFERS, b'').strip()
                 if resp != b'0':
                     command_success = False
 
@@ -1438,7 +1443,7 @@ class IridiumCommunicator(object):
         return self._acquire_response(Command.CHECK_RING, wait_time=wait_time, wait_for_previous=wait_for_previous)
     # end acquire_signal_quality
 
-    def clear_mo_buffer(self, nested=False, in_read=False):
+    def clear_mo_buffer(self):
         """Clear the mo transmit buffer."""
         if not self.is_port_connected():
             self.signal.notification("Error", "Serial port not connected", "The port is closed!")
@@ -1451,6 +1456,34 @@ class IridiumCommunicator(object):
     def queue_clear_mo_buffer(self):
         """Queue the clear mo buffer message."""
         self.queue_command(Command.CLEAR_MO_BUFFER)
+
+    def clear_mt_buffer(self):
+        """Clear the mt receive buffer."""
+        if not self.is_port_connected():
+            self.signal.notification("Error", "Serial port not connected", "The port is closed!")
+            return False
+
+        self.previous_command = Command.CLEAR_MT_BUFFER
+        self.write_serial(self.previous_command + b'\r')
+    # end clear_mt_buffer
+
+    def queue_clear_mt_buffer(self):
+        """Queue the clear mt receive message."""
+        self.queue_command(Command.CLEAR_MT_BUFFER)
+
+    def clear_both_buffers(self):
+        """Clear the mo transmit and the mt receive buffer."""
+        if not self.is_port_connected():
+            self.signal.notification("Error", "Serial port not connected", "The port is closed!")
+            return False
+
+        self.previous_command = Command.CLEAR_BOTH_BUFFER
+        self.write_serial(self.previous_command + b'\r')
+    # end clear_both_buffer
+
+    def queue_clear_both_buffer(self):
+        """Queue the clear mo transmit and mt receive message."""
+        self.queue_command(Command.CLEAR_BOTH_BUFFER)
 
     def check_message(self):
         """Check for a message by using a session."""
