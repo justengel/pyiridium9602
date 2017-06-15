@@ -1083,16 +1083,16 @@ class IridiumCommunicator(object):
             wait_for_previous (float)[120]: Time in seconds to wait for the previous command to finish
         """
         # Wait for previous command to finish
-        start = time.clock()
+        start = time.time()
         while (self.pending_command() or len(self._sequential_write_queue) > 0) and (
-                time.clock() - start < wait_for_previous):
+                time.time() - start < wait_for_previous):
             time.sleep(0.001)
 
         yield
 
         # Wait for this command to finish and nested commands to finish
-        start = time.clock()
-        while self.pending_command() and (time.clock() - start < wait_time):
+        start = time.time()
+        while self.pending_command() and (time.time() - start < wait_time):
             time.sleep(0.001)
     # end wait_for_command
 
@@ -1536,18 +1536,18 @@ class IridiumCommunicator(object):
         self.signal.message_receive_failed = msg_failed
 
         # Wait for the previous command to finish
-        start = time.clock()
+        start = time.time()
         while (self.pending_command() or len(self._sequential_write_queue) > 0) and (
-                time.clock() - start < wait_for_previous):
+                time.time() - start < wait_for_previous):
             time.sleep(0.001)
 
         self.previous_command = Command.SESSION
         self.write_serial(self.previous_command + b"\r")
 
         # Wait for other commands to finish like clear_mo_buffer, and read_binary
-        start = time.clock()
+        start = time.time()
         while (self.pending_command() or len(self._sequential_write_queue) > 0) and (
-                time.clock() - start < wait_time):
+                time.time() - start < wait_time):
             time.sleep(0.001)
 
         # Replace the signal callbacks with their original methods

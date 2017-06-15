@@ -311,10 +311,10 @@ class IridiumServer(pyiridium.IridiumCommunicator):
                 # Read the Contents of the Write Binary message
                 # Note: this section cannot be in the main read loop because b'\r' can be in the contents of the message
                 msg = self.read_serial()
-                start = time.clock()
+                start = time.time()
                 while len(msg) < length + 2:
                     # Prevent running forever
-                    if time.clock() - start < 60:
+                    if time.time() - start < 60:
                         self._mo_status = 18
                         self._silent_write(Command.OK + b'\r\n')
                         raise IridiumError("Timeout on Write Binary")
