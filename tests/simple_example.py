@@ -5,11 +5,11 @@
 
 Very simple test for pyiridium. Run this while running the pyiridium_server
 """
-import pyiridium
+import pyiridium9602
 import time
 
 # Create your own serial port object and give it as the first argument or just give it the port name.
-iridium_port = pyiridium.IridiumCommunicator("COM2")
+iridium_port = pyiridium9602.IridiumCommunicator("COM2")
 
 
 def message_failed(msg_len, content, checksum, calc_check):

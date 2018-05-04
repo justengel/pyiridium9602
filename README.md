@@ -1,4 +1,4 @@
-# pyiridium 
+# pyiridium9602 
 Python 3 iridium satelite communication library for the iridium 9602 modem.
 
 ## Purpose
@@ -39,10 +39,10 @@ Message acquired: b'exit'
 Use the Signal class (or create your own class) and use custom callback methods while the IridiumCommunicator class manages all of the communications.
 
 ```python
-import pyiridium
+import pyiridium9602
 
 # Create your own serial port object and give it as the first argument or just give it the port name.
-iridium_port = pyiridium.IridiumCommunicator("COM2")
+iridium_port = pyiridium9602.IridiumCommunicator("COM2")
 
 # Message parser
 def parse_data(data):
@@ -83,7 +83,7 @@ with iridium_port.wait_for_command():
     iridium_port.check_ring()  # If an SBD ring is found automatically start the session to read the value.
 
 # Blocking Command (Do not wait for previous `wait_for_previous=0`)
-serial_number = iridium_port.acquire_response(pyiridium.Command.SERIAL_NUMBER, wait_for_previous=0)
+serial_number = iridium_port.acquire_response(pyiridium9602.Command.SERIAL_NUMBER, wait_for_previous=0)
 print("Manual Serial Number:", serial_number)
 
 # Pre-made Blocking Command
@@ -101,12 +101,12 @@ The IridiumCommunicator was created to work with threading that is why the Signa
 To use threading follow the example below.
 
 ```python
-import pyiridium
+import pyiridium9602
 import threading
 import time
 
 # Create your own serial port object and give it as the first argument or just give it the port name.
-iridium_port = pyiridium.IridiumCommunicator("COM2")
+iridium_port = pyiridium9602.IridiumCommunicator("COM2")
 
 class CustomSignal(object):
     """Create a cusotm Signal callback manager.
@@ -116,7 +116,7 @@ class CustomSignal(object):
         does not exist it will use the print function. You may want to use the notification method for logging special events.
 
     See Also:
-        pyiridium.Signal
+        pyiridium9602.Signal
     """
 
     def connected(self):

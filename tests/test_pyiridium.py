@@ -5,10 +5,10 @@
 
 Very simple test for pyiridium.
 """
-import pyiridium
+import pyiridium9602
 
 # Create your own serial port object and give it as the first argument or just give it the port name.
-iridium_port = pyiridium.IridiumCommunicator("COM2")
+iridium_port = pyiridium9602.IridiumCommunicator("COM2")
 
 
 # Message parser
@@ -53,7 +53,7 @@ with iridium_port.wait_for_command():
 # Note: the session may be queued to start. The wait only waits for the check_ring command that was sent.
 
 # Blocking Command (Do not wait for previous `wait_for_previous=0`)
-serial_number = iridium_port.acquire_response(pyiridium.Command.SERIAL_NUMBER, wait_for_previous=0)
+serial_number = iridium_port.acquire_response(pyiridium9602.Command.SERIAL_NUMBER, wait_for_previous=0)
 print("Manual Serial Number:", serial_number)
 
 # Stop the `iridium_port.listen_thread` and close the port

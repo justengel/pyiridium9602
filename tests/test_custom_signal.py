@@ -3,12 +3,12 @@
     SeaLandAire Technologies
     @author: jengel
 """
-import pyiridium
+import pyiridium9602
 import threading
 import time
 
 # Create your own serial port object and give it as the first argument or just give it the port name.
-iridium_port = pyiridium.IridiumCommunicator("COM2")
+iridium_port = pyiridium9602.IridiumCommunicator("COM2")
 
 
 class CustomSignal(object):
@@ -20,7 +20,7 @@ class CustomSignal(object):
         events.
 
     See Also:
-        pyiridium.Signal
+        pyiridium9602.Signal
     """
 
     def connected(self):

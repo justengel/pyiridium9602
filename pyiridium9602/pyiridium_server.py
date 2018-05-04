@@ -14,19 +14,19 @@ import random
 import time
 import datetime
 
-import pyiridium
+import pyiridium9602
 
-Command = pyiridium.Command
+Command = pyiridium9602.Command
 
-MO_STATUS = pyiridium.MO_STATUS
-MT_STATUS = pyiridium.MT_STATUS
+MO_STATUS = pyiridium9602.MO_STATUS
+MT_STATUS = pyiridium9602.MT_STATUS
 
-IridiumError = pyiridium.IridiumError
+IridiumError = pyiridium9602.IridiumError
 
-Signal = pyiridium.Signal
+Signal = pyiridium9602.Signal
 
 
-class IridiumServer(pyiridium.IridiumCommunicator):
+class IridiumServer(pyiridium9602.IridiumCommunicator):
     """Iridium Server emulator for testing."""
 
     DEFAULT_OPTIONS = {'echo': True,
