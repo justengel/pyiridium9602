@@ -32,10 +32,10 @@ if __name__ == "__main__":
 
     setup(
         name="pyiridium9602",
-        version="1.2.0",
+        version="1.2.1",
         description="Python 3 iridium communication library for the iridium 9602 modem.",
-        url="https://github.com/HashSplat/pyiridium9602",
-        download_url="https://github.com/HashSplat/pyiridium9602/archive/v1.2.0.tar.gz",
+        url="https://github.com/justengel/pyiridium9602",
+        download_url="https://github.com/justengel/pyiridium9602/archive/v1.2.1.tar.gz",
 
         keywords=["iridium", "9602", "iridium9602"],
 
