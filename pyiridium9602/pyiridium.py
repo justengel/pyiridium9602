@@ -694,7 +694,9 @@ class IridiumCommunicator(object):
         """
         try:
             return self.serialport.readline()
-        except:
+        except Exception as err:
+            self.signal.notification("Error", "Error when reading from the serial port! The connection will be closed!",
+                                     str(err))
             self.close()
             return b''
     # end read_serial
@@ -703,7 +705,9 @@ class IridiumCommunicator(object):
         """Serial port write command that can be overwritten with inheritance to log data."""
         try:
             self.serialport.write(msg)
-        except:
+        except Exception as err:
+            self.signal.notification("Error", "Error when writing to the serial port! The connection will be closed!",
+                                     str(err))
             self.close()
     # end write_serial
 
