@@ -579,6 +579,8 @@ class IridiumCommunicator(object):
         self._timeout = 0.01
         self._connect_timeout = 2
         self._serial_number = ""
+        self._last_mt_queued = 0
+        self._last_mt_queued_retry = 0
         self._read_buf = b''
         self._write_queue = collections.deque(maxlen=100)
         self._sequential_write_queue = collections.deque(maxlen=100)
@@ -943,11 +945,19 @@ class IridiumCommunicator(object):
 
                     # Check if there is a message to process - mt_status 0 no message, 1 success, 2 fail
                     if mt_status == 1 and mt_length > 0:
+                        self._last_mt_queued = mt_queued
+                        self._last_mt_queued_retry = 0
                         self.queue_read_binary_message()
 
                     elif mt_status > 1:
                         self.signal.notification("Error", "Message Receive Failed!",
                                                  MT_STATUS.get(mt_status, "Unknown error!"))
+
+                        # An error happened! Check the last mt_queued value to see if we should retry
+                        if mt_queued == 0 and self._last_mt_queued > 1 and self._last_mt_queued_retry < 2:
+                            time.sleep(0.5)  # Wait some time to retry
+                            mt_queued = self._last_mt_queued
+                            self._last_mt_queued_retry += 1
 
                     # Check for additional messages until the queue is empty
                     if mt_queued > 0 and self.get_option("auto_read"):
