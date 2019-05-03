@@ -16,6 +16,12 @@ import datetime
 import atexit
 
 
+__all__ = ['Command', 'MO_STATUS', 'MT_STATUS', 'IridiumError',
+           'parse_system_time', 'parse_serial_number', 'parse_signal_quality', 'parse_check_ring',
+           'parse_session', 'parse_read_binary', 'has_read_binary_data', 'parse_write_binary',
+           'Signal', 'IridiumCommunicator', 'run_serial_log_file', 'run_communicator']
+
+
 class Command:
     """Commands for Iridium. Maybe in the future make a system where a command is a class associated with a specific 
     parsing action. That would make it easier to add new commands.
