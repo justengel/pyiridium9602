@@ -70,6 +70,7 @@ iridium_port.signal = CustomSignal()
 
 # Manually creating the thread
 th = threading.Thread(target=iridium_port.listen)
+th.daemon = True
 th.start()
 
 # NOTE: There is no thread, so connect creates a thread to Complete the connection process

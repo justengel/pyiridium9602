@@ -14,19 +14,10 @@ import random
 import time
 import datetime
 
-import pyiridium9602
-
-Command = pyiridium9602.Command
-
-MO_STATUS = pyiridium9602.MO_STATUS
-MT_STATUS = pyiridium9602.MT_STATUS
-
-IridiumError = pyiridium9602.IridiumError
-
-Signal = pyiridium9602.Signal
+from pyiridium9602.pyiridium import Command, MO_STATUS, MT_STATUS, IridiumError, Signal, IridiumCommunicator
 
 
-class IridiumServer(pyiridium9602.IridiumCommunicator):
+class IridiumServer(IridiumCommunicator):
     """Iridium Server emulator for testing."""
 
     DEFAULT_OPTIONS = {'echo': True,
@@ -389,9 +380,13 @@ def run_server(port="COM2"):
 
 if __name__ == "__main__":
     import sys
+    import argparse
 
-    port = "COM2"
+    # Command Line arguments
+    parser = argparse.ArgumentParser(description="Run the iridium server to mock how the iridium modem works.")
+    parser.add_argument('port', type=str, help="COM port to use",)
 
-    if len(sys.argv) > 1:
-        port = sys.argv[1]
-    run_server(port)
+    pargs = parser.parse_args(sys.argv[1:])
+
+    #Run the server
+    run_server(pargs.port)

@@ -577,7 +577,7 @@ class IridiumCommunicator(object):
             self.options.update(options)
 
         # Control states
-        self._active = False
+        self._active = threading.Event()
         self._connected = False
 
         # Variables
@@ -725,6 +725,7 @@ class IridiumCommunicator(object):
         if not self.is_listening() and self.listen_thread is None:
             self.signal.notification("Warning", "No threads are listening for responses. A thread will be created", "")
             self.listen_thread = threading.Thread(target=self.listen)
+            self.listen_thread.daemon = True  # Close at program exit. Otherwise the program will remain open.
             self.listen_thread.start()
     # end start_thread
 
@@ -837,15 +838,18 @@ class IridiumCommunicator(object):
     
     def is_listening(self):
         """Return if the IridiumCommunicator is actively listening."""
-        return self._active
+        return self._active.is_set()
     
     def set_listening(self, value):
         """Set if the IridiumCommunicator is listening for responses."""
-        self._active = value
+        if value:
+            self._active.set()
+        else:
+            self.stop_listening()
 
     def stop_listening(self):
         """Stop the IridiumCommunicator from listening."""
-        self._active = False
+        self._active.clear()
         try:
             self.listen_thread.join()
         except AttributeError:
@@ -859,10 +863,10 @@ class IridiumCommunicator(object):
             IridiumError: If there is already a thread listening. Multiple threads will mess up the internal read buffer
         """
         # Check if there is another thread listening
-        if self._active:
+        if self.is_listening():
             raise IridiumError("There is already a thread listening!")
 
-        self._active = True
+        self._active.set()
         while self.is_listening():
             if self.is_port_connected():
                 data = self.read_serial()
@@ -1771,25 +1775,16 @@ def run_communicator(port="COM2"):
 if __name__ == "__main__":
     import sys
     import argparse
-    
-    port = "COM2"
-    filename = None
-    
+
     # Command Line arguments
-    parser = argparse.ArgumentParser(description="Build or install a Python library.")
+    parser = argparse.ArgumentParser(description="Run the iridium client.")
+    parser.add_argument('port', type=str, help="COM port to use")
+    parser.add_argument('-f', '--filename', type=str, default=None, help='Filename to run a log file.')
 
-    parser.add_argument('-p', type=str,
-                        help="COM port to use",
-                        default=port)
+    pargs = parser.parse_args(sys.argv[1:])
 
-    parser.add_argument('-f', '--filename', type=str,
-                        help='Filename to run a log file.',
-                        default=filename)
-
-    pargs, remain = parser.parse_known_args(sys.argv[1:])
-    # sys.argv = sys.argv[:1] + remain
-
+    # Run the file or client
     if pargs.filename is not None:
-        run_serial_log_file(pargs.filename, pargs.p)
+        run_serial_log_file(pargs.filename, pargs.port)
     else:
-        run_communicator(pargs.p)
+        run_communicator(pargs.port)

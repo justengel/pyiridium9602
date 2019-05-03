@@ -11,7 +11,7 @@ This library is strictly a callback based library, although blocking methods are
 See the modules under the tests folder for examples of how to use the library.
 
 ## Example
-Try running `pyiridium_server.py` and `pyiridium.py` to see how the library works.
+Try running `python -m pyiridium9602.pyiridium_server COM1` and `python -m pyiridium9602.pyiridium COM1` to see how the library works.
 
 ```
 # ===== Command Line: pyiridium_server.py COM2 =====
