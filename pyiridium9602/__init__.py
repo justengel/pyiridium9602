@@ -1,3 +1,5 @@
+from .__meta__ import version as __version__
+
 from .pyiridium import *
 from .pyiridium_server import IridiumServer, run_server
 
@@ -5,10 +7,10 @@ from .pyiridium_server import IridiumServer, run_server
 if __name__ == "__main__":
     import sys
     import argparse
-    
+
     port = ""
     filename = None
-    
+
     # Command Line arguments
     parser = argparse.ArgumentParser(description="Build or install a Python library.")
 
@@ -33,4 +35,4 @@ if __name__ == "__main__":
         run_serial_log_file(args.filename, args.p)
 
     else:
-        run_communicator(args.p)    
+        run_communicator(args.p)

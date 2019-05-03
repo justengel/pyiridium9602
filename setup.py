@@ -6,78 +6,87 @@ See Also:
     https://pythonhosted.org/an_example_pypi_project/setuptools.html
 """
 import os
-
-from setuptools import setup
-
-
-def parse_requirements(filename):
-    """ load requirements from a pip requirements file """
-    lineiter = (line.strip() for line in open(filename))
-    return [line for line in lineiter if line and not line.startswith("#")]
+import glob
+import sys
+from setuptools import setup, Extension, find_packages
 
 
 def read(fname):
     """Read in a file"""
-    with open(os.path.join(os.path.dirname(__file__), fname), "r") as file:
+    with open(os.path.join(os.path.dirname(__file__), fname), 'r') as file:
         return file.read()
 
 
+def get_meta(filename):
+    """Return the metadata dictionary from the given filename."""
+    with open(filename, 'r') as f:
+        meta = {}
+        exec(compile(f.read(), filename, 'exec'), meta)
+        return meta
+
+
 if __name__ == "__main__":
-    # ===== Requirements =====
-    try:
-        requirements = parse_requirements("requirements.txt")
-    except FileNotFoundError:
-        requirements = []
-    # ===== END Requirements =====
+    # Variables
+    meta = get_meta('pyiridium9602/__meta__.py')
+    name = meta['name']
+    version = meta['version']
+    description = meta['description']
+    url = meta['url']
+    author = meta['author']
+    author_email = meta['author_email']
+    keywords = 'iridium 9602 iridium9602 serial'
+    packages = find_packages(exclude=('tests', 'docs'))
 
-    setup(
-        name="pyiridium9602",
-        version="1.2.2",
-        description="Python 3 iridium communication library for the iridium 9602 modem.",
-        url="https://github.com/justengel/pyiridium9602",
-        download_url="https://github.com/justengel/pyiridium9602/archive/v1.2.2.tar.gz",
+    # Extensions
+    extensions = []
+    # module1 = Extension('libname',
+    #                     # define_macros=[('MAJOR_VERSION', '1')],
+    #                     # extra_compile_args=['-std=c99'],
+    #                     sources=['file.c', 'dir/file.c'],
+    #                     include_dirs=['./dir'])
+    # extensions.append(module1)
 
-        keywords=["iridium", "9602", "iridium9602"],
+    setup(name=name,
+          version=version,
+          description=description,
+          long_description=read('README.md'),
+          keywords=keywords,
+          url=url,
+          download_url=''.join((url, '/archive/v', version, '.zip')),
 
-        author="Justin Engel",
-        author_email="jengel@sealandaire.com",
+          author=author,
+          author_email=author_email,
 
-        license="MIT",
+          license='MIT',
+          platforms='any',
+          classifiers=['Programming Language :: Python',
+                       'Programming Language :: Python :: 3',
+                       'Operating System :: OS Independent'],
 
-        platforms="any",
-        classifiers=["Programming Language :: Python",
-                     "Programming Language :: Python :: 3",
-                     "Operating System :: OS Independent"],
+          scripts=[file for file in glob.iglob('bin/*.py')],  # Run with python -m Scripts.module args
 
-        scripts=[],
+          ext_modules=extensions,  # C extensions
+          packages=packages,
+          include_package_data=True,
+          package_data={pkg: ['*', '*/*', '*/*/*', '*/*/*/*', '*/*/*/*/*']
+                        for pkg in packages if '/' not in pkg and '\\' not in pkg},
 
-        long_description=read("README.md"),
-        packages=["pyiridium9602"],
-        install_requires=requirements,
+          # Data files outside of packages
+          # data_files=[('my_data', ['data/my_data.dat'])],
 
-        include_package_data=False,
+          # options to install extra requirements
+          install_requires=[
+              'pyserial>=3.4',
+              ],
+          extras_require={
+              },
 
-        # package_data={
-        #     'package': ['file.dat']
-        # }
-
-        # options to install extra requirements
-        extras_require={
-            'acoustic_types': ['numpy', 'scipy'],
-        }
-
-        # Data files outside of packages
-        # data_files=[('my_data', ["data/my_data.dat"])],
-
-        # keywords='sample setuptools development'
-
-        # entry_points={
-        #     'console_scripts': [
-        #         'foo = my_package.some_module:main_func',
-        #         'bar = other_module:some_func',
-        #     ],
-        #     'gui_scripts': [
-        #         'baz = my_package_gui:start_func',
-        #     ]
-        # }
-    )
+          # entry_points={
+          #     'console_scripts': [
+          #         'plot_csv=bin.plot_csv:plot_csv',
+          #         ],
+          #     'gui_scripts': [
+          #         'baz = my_package_gui:start_func',
+          #         ]
+          #     }
+          )

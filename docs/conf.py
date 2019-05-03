@@ -55,7 +55,7 @@ project = 'API Documentation'
 author = ''
 version = '' # The short X.Y version.
 project_key = 'apidocs'
-copyright = '2017, SeaLandAire Technologies'
+copyright = ''
 
 # The full version, including alpha/beta/rc tags.
 release = ''
