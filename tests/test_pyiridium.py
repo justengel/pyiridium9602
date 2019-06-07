@@ -5,6 +5,7 @@
 
 Very simple test for pyiridium.
 """
+from __future__ import print_function
 import pyiridium9602
 
 # Create your own serial port object and give it as the first argument or just give it the port name.

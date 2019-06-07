@@ -3,6 +3,8 @@
     SeaLandAire Technologies
     @author: jengel
 """
+from __future__ import print_function
+
 import pyiridium9602
 import threading
 import time

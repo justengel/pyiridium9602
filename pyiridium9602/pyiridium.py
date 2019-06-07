@@ -6,6 +6,9 @@
 Manages iridium satellite communications.
 Iridium data sheet: http://www.nalresearch.com/Info/AT%20Commands%20for%20Models%209602.pdf
 """
+from __future__ import print_function
+
+import sys
 import time
 import serial
 import threading
@@ -157,7 +160,7 @@ def parse_system_time(data):
                 sys_time = int(split_resp, 16)
                 return sys_time
     except Exception as err:
-        raise IridiumError("Could not parse the system time!") from err
+        raise IridiumError("Could not parse the system time!")  # from err
     raise IridiumError("Could not parse the system time!")
 # end parse_system_time
 
@@ -190,7 +193,7 @@ def parse_serial_number(data):
         if resp != Command.OK and data != b'':
             return resp.decode("utf-8")
     except Exception as err:
-        raise IridiumError("Could not parse the serial number!") from err
+        raise IridiumError("Could not parse the serial number!")  # from err
     raise IridiumError("Could not parse the serial number!")
 # end parse_serial_number
 
@@ -224,7 +227,7 @@ def parse_signal_quality(data):
             sig = int(split_resp)
             return sig
     except Exception as err:
-        raise IridiumError("Could not parse the signal quality!") from err
+        raise IridiumError("Could not parse the signal quality!")  # from err
     raise IridiumError("Could not parse the signal quality!")
 # end parse_signal_quality
 
@@ -261,7 +264,7 @@ def parse_check_ring(data):
             sri = int(parts[1])  # indicates the SBD ring indication status
             return tri, sri
     except Exception as err:
-        raise IridiumError("Could not parse the check ring response!") from err
+        raise IridiumError("Could not parse the check ring response!")  # from err
     raise IridiumError("Could not parse the check ring response!")
 # end parse_check_ring
 
@@ -308,7 +311,7 @@ def parse_session(data):
             return mo_status, mo_msn, mt_status, mt_msn, mt_length, mt_queued
 
     except Exception as err:
-        raise IridiumError("Could not parse the session!") from err
+        raise IridiumError("Could not parse the session!")  # from err
     raise IridiumError("Could not parse the session!")
 # end parse_session
 
@@ -348,7 +351,7 @@ def parse_read_binary(data):
         return msg_len, content, checksum, calc_check
 
     except Exception as err:
-        raise IridiumError("Could not parse the read binary response!") from err
+        raise IridiumError("Could not parse the read binary response!")  # from err
 # end parse_read_binary
 
 
@@ -557,7 +560,7 @@ class IridiumCommunicator(object):
     IRIDIUM_EPOCH = datetime.datetime.strptime(IRIDIUM_EPOCH_STR, "%b %d, %Y, %H:%M:%S (%Z)")
 
     def __init__(self, serialport=None, signal=None, options=None):
-        super().__init__()
+        super(IridiumCommunicator, self).__init__()
         
         # Close when the program exits
         def safe_close():
@@ -750,7 +753,7 @@ class IridiumCommunicator(object):
             if not self.serialport.isOpen():
                 self.serialport.open()
         except Exception as err:
-            raise IridiumError("Could not connect. The serial port would not open!") from err
+            raise IridiumError("Could not connect. The serial port would not open!")  # from err
 
         # Start a thread to listen for responses
         if create_thread and not self.is_listening():
@@ -802,7 +805,7 @@ class IridiumCommunicator(object):
             if not self.serialport.isOpen():
                 self.serialport.open()
         except Exception as err:
-            raise IridiumError("Could not connect. The serial port would not open!") from err
+            raise IridiumError("Could not connect. The serial port would not open!")  # from err
 
         # Connected signal
         self._connected = True

@@ -5,6 +5,8 @@
 
 Very simple test for pyiridium. Run this while running the pyiridium_server
 """
+from __future__ import print_function
+
 import pyiridium9602
 import time
 

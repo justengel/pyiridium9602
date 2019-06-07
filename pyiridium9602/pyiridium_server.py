@@ -28,7 +28,7 @@ class IridiumServer(IridiumCommunicator):
                        }
 
     def __init__(self, serialport=None, signal=None, options=None):
-        super().__init__(None, signal, options)
+        super(IridiumServer, self).__init__(None, signal, options)
 
         # Variables
         self._serial_number = str(random.randint(0, 65535))
@@ -64,7 +64,7 @@ class IridiumServer(IridiumCommunicator):
             if not self.serialport.isOpen():
                 self.serialport.open()
         except Exception as err:
-            raise IridiumError("Could not connect. The serial port would not open!") from err
+            raise IridiumError("Could not connect. The serial port would not open!")  # from err
 
         # Start a thread to listen for responses
         if create_thread and not self.is_listening():
